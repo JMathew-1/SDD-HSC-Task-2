@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Number Index Finder</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <header>
+    <a style="color: rgb(255, 255, 255);">ArrayFinder</a>
+    <nav>
+      <ul class="nav__links">
+        <li><a href="main-menu.html">Main Menu</a></li>
+        <li><a href="instructions.html">Instructions</a></li>
+        <li><a href="faq.html">FAQ</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <h1>Number Index Finder</h1>
+
+  <div class="container">
+    <div id="arrayTableContainer"></div>
+    <button class="cta" id="editButton" onclick="toggleEditMode()">Edit Array</button>
+  </div>
+
+  <div class="buttons-container"> <!-- All the buttons to sort, search, shuffle and reset the array. -->
+    <input style="margin-bottom: 30px;" type="text" id="userInput" placeholder="Enter a number">
+    <button class="cta" onclick="findNumber()">Find Index</button>
+    <br>
+    <button style="margin-right: 60px;" class="cta" onclick="bubbleSort()">Bubble Sort</button>
+    <button style="margin-right: 60px;" class="cta" onclick="resetArray()">Reset Array</button>
+    <button class="cta" onclick="shuffleArray()">Shuffle Array</button>
+  </div>
+
+  <p id="resultMessage"></p>
+
+  <!-- Array History Section -->
+  <section id="arrayHistory">
+    <div id="arrayHistoryContainer" class="array-history-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Array History</th>
+          </tr>
+        </thead>
+        <tbody id="arrayHistoryBody"></tbody>
+      </table>
+    </div>
+    <button class="clear-history-button" onclick="clearHistory()">Clear History</button>
+  </section>
+
+  <script>
+    // Initialize the sorted array, edit mode flag, and array history
+    let sortedArray = [42, 32, 23, 12, 19, 52];
+    let editMode = false;
+    let savedArrays = [];
+
+    // Function to find the index of a number in the sorted array
+    function findNumber() {
+      const userInput = document.getElementById('userInput').value;
+      const num = parseInt(userInput);   // To use the parse function on the users input
+      const resultMessage = document.getElementById('resultMessage');
+
+      // Check if the input is a valid number
+      if (isNaN(num)) {
+        resultMessage.innerText = 'Invalid input';
+        resultMessage.classList.add('invalid-input');
+        resultMessage.classList.remove('found');
+        resultMessage.classList.remove('not-found');
+        return;
+      }
+
+      // Perform binary search to find the index of the number
+      const index = binarySearch(sortedArray, num);
+
+      // Display the result message based on whether the number was found or not
+      if (index !== -1) {
+        resultMessage.innerText = `The number ${num} was found at index ${index}`;
+        resultMessage.classList.remove('not-found');
+        resultMessage.classList.add('found'); // Add 'found' class here
+      } else {
+        resultMessage.innerText = `The number ${num} was not found in the array`;
+        resultMessage.classList.remove('found');
+        resultMessage.classList.add('not-found');
+      }
+    }
+
+    // Function to perform bubble sort on the sorted array
+    function bubbleSort() {
+      for (let i = 0; i < sortedArray.length - 1; i++) { // Iterate over the array from the beginning to the second-to-last element
+        for (let j = 0; j < sortedArray.length - 1 - i; j++) { // Iterate over the unsorted portion of the array
+          if (sortedArray[j] > sortedArray[j + 1]) {    // Compare elements and swap them if they are in the wrong order
+            [sortedArray[j], sortedArray[j + 1]] = [sortedArray[j + 1], sortedArray[j]];
+          }
+        }
+      }
+      updateArrayTable(sortedArray); // Update the table with the sorted array
+    }
+
+    // Function to reset the sorted array to its initial state
+    function resetArray() {
+      sortedArray = [42, 32, 23, 12, 19, 52];
+      updateArrayTable(sortedArray);
+      document.getElementById('resultMessage').innerText = '';
+    }
+
+    // Function to shuffle the elements of the sorted array
+    function shuffleArray() {
+      const shuffledArray = sortedArray.slice(); // Make a copy of the array
+      for (let i = shuffledArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffledArray[i], shuffledArray[j]] = [shuffledArray[j], shuffledArray[i]];
+      }
+      sortedArray = shuffledArray.slice(); // Update the sortedArray with the shuffled values
+      updateArrayTable(sortedArray); // Update the table with the shuffled array
+    }
+
+    // Function to toggle edit mode for the sorted array
+    function toggleEditMode() {
+      editMode = !editMode;
+      updateArrayTable(sortedArray);
+      const editButton = document.getElementById('editButton');
+      editButton.textContent = editMode ? 'Save Array' : 'Edit Array';
+      if (!editMode) {
+        saveArray(sortedArray); // Save the array when exiting edit mode
+      }
+    }
+
+    // Function to perform binary search on a sorted array
+    function binarySearch(arr, target) {
+      let low = 0; // Initialize the low pointer to the start of the array
+      let high = arr.length - 1; // Initialize the high pointer to the end of the array
+
+      // Continue the search until the low pointer exceeds the high pointer
+      while (low <= high) {
+        const mid = Math.floor((low + high) / 2); // Calculate the middle index of the current search range
+
+        // Check if the middle element is equal to the target
+        if (arr[mid] === target) {
+          return mid; // Return the index of the target if it's found
+        }
+
+        // If the middle element is less than the target, adjust the low value to search the right half of the array
+        if (arr[mid] < target) {
+          low = mid + 1;
+        } else {
+          // If the middle element is greater than the target, adjust the high value to search the left half of the array
+          high = mid - 1;
+        }
+      }
+
+      return -1; // Return -1 if the target is not found in the array
+    }
+
+
+    // Function to create HTML table from an array
+    function createTable(array) {
+      const table = document.createElement('table');
+      const tbody = document.createElement('tbody');
+
+      // Create the first row with indices
+      const indexRow = document.createElement('tr');
+      for (let i = 0; i < array.length; i++) {
+        const cellIndex = document.createElement('td');
+        cellIndex.textContent = i;
+        indexRow.appendChild(cellIndex);
+      }
+      tbody.appendChild(indexRow);
+
+      // Create the second row with input fields for values
+      const valueRow = document.createElement('tr');
+      for (let i = 0; i < array.length; i++) {     // Loop through each element in the array to create input fields
+        const cellValue = document.createElement('td');
+        const inputField = document.createElement('input');
+        inputField.type = 'text';
+        inputField.value = array[i];
+        if (editMode) {
+          cellValue.classList.add('editable');
+          inputField.disabled = false; // Enable the input field for editing
+        } else {
+          inputField.disabled = true; // Disable the input field if edit mode is not enabled
+        }
+        inputField.addEventListener('input', function (event) {
+          const newValue = parseInt(event.target.value);
+          if (!isNaN(newValue)) {   // Check if the new value is a valid number
+            array[i] = newValue;
+            findNumber();   // Call the findNumber function to search for the updated value in the array
+          }
+        });
+        cellValue.appendChild(inputField);
+        valueRow.appendChild(cellValue);
+      }
+      tbody.appendChild(valueRow);
+
+      table.appendChild(tbody);
+      return table;
+    }
+
+    // Function to update the array table
+    function updateArrayTable(array) {
+      const arrayTableContainer = document.getElementById('arrayTableContainer');
+      arrayTableContainer.innerHTML = '';
+      arrayTableContainer.appendChild(createTable(array));
+    }
+
+    // Function to save array to array history
+    function saveArray(array) {
+      savedArrays.push(array.slice()); // Make a copy of the array 
+      updateArrayHistory();
+    }
+
+    // Function to update array history
+    function updateArrayHistory() {
+      const arrayHistoryBody = document.getElementById('arrayHistoryBody');   // Get the element that will contain the array history
+      arrayHistoryBody.innerHTML = ''; // Clear any existing content inside the array history element
+
+      savedArrays.forEach((array, index) => {
+        const arrayRow = document.createElement('tr');  // Create a new table row element to represent each saved array
+        const arrayCell = document.createElement('td');
+        const arrayButton = document.createElement('button');
+        arrayButton.textContent = `Array ${index + 1}`; // Set the text content of the button to indicate the array's index in the savedArrays array
+        arrayButton.classList.add('array-button');  // Add a CSS class for styling 
+        arrayButton.onclick = function () {
+          setCurrentArray(array);
+        };
+        arrayCell.appendChild(arrayButton);
+        arrayRow.appendChild(arrayCell);
+        arrayHistoryBody.appendChild(arrayRow);
+      });
+    }
+
+    // Function to set the current array
+    function setCurrentArray(array) {
+      sortedArray = array.slice(); // Make a copy of the array to avoid reference issues
+      updateArrayTable(sortedArray);
+      document.getElementById('resultMessage').innerText = '';
+    }
+
+    // Function to clear array history
+    function clearHistory() {
+      savedArrays = [];
+      updateArrayHistory();
+    }
+
+    // Initialize array table
+    updateArrayTable(sortedArray);
+
+    // Initialize array history
+    updateArrayHistory();
+
+  </script>
+</body>
+
+</html>
