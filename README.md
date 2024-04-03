@@ -6,10 +6,10 @@ Features
 
 - **Find Index:** Allows users to find the index of a number in the sorted array.
 - **Edit Array:** Enables editing of the sorted array.
-- **Bubble Sort:** Performs bubble sort on the sorted array.
+- **Bubble Sort:** Performs bubble sort on the array.
 - **Reset Array:** Resets the sorted array to its initial state.
-- **Shuffle Array:** Shuffles the elements of the sorted array.
-- **Array History:** Keeps track of previously saved arrays.
+- **Shuffle Array:** Shuffles the elements of the array.
+- **Array History:** Keeps track of previously saved arrays and allows users to revert back to those arrays.
 
 Usage
 
